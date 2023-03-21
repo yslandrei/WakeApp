@@ -1,15 +1,15 @@
 import React, {useState} from 'react'
 import { Text, View, Switch, TouchableHighlight } from 'react-native'
 
-const Alarm = ({ time }) => {
-    const [isEnabled, setIsEnabled] = useState(false)
+const Alarm = ({ alarm, openModal, setModalTitle }) => {
+    const [isEnabled, setIsEnabled] = useState(alarm["enabled"])
     const toggleSwitch = () => {
         setIsEnabled(previousState => !previousState)
-        console.log('Alarm On/Off\n')
     }
 
     const editAlarm = () => {
-        console.log('Alarm Edit\n')
+        setModalTitle('Edit Alarm')
+        openModal(alarm)
     }
 
     return (
@@ -24,12 +24,12 @@ const Alarm = ({ time }) => {
                         <Text
                             className='text-6xl font-extralight mt-5 mb-2'
                             style={{color: isEnabled ? '#374151' : '#9CA3AF'}}>
-                            {time}
+                            {alarm["time"]}
                         </Text>
                         <Switch
                             className='self-center'
                             trackColor={{false: '#D1D5DB', true: '#1C64F2'}}
-                            thumbColor={isEnabled ? '#f4f3f4' : '#f4f3f4'}
+                            thumbColor={isEnabled ? '#f4f4f4' : '#f4f4f4'}
                             ios_backgroundColor='#D1D5DB'
                             value={isEnabled}
                             onValueChange={toggleSwitch}

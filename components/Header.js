@@ -1,8 +1,9 @@
 import { SafeAreaView, Text, View, TouchableOpacity } from 'react-native'
 
-const Header = ({ title, openModal }) => {
+const Header = ({ title, openModal, setModalTitle, alarms }) => {
     const addNewAlarm = () => {
-        openModal()
+        setModalTitle('Add Alarm')
+        openModal(alarms[0])
     }
 
     return (
