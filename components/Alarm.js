@@ -26,7 +26,6 @@ const Alarm = ({ time }) => {
                             style={{color: isEnabled ? '#374151' : '#9CA3AF'}}>
                             {time}
                         </Text>
-
                         <Switch
                             className='self-center'
                             trackColor={{false: '#D1D5DB', true: '#1C64F2'}}

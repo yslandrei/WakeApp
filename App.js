@@ -37,6 +37,7 @@ export default function App() {
                 </View>
             </ScrollView>
             <Modal
+                title='Add Alarm'
                 visible={visible}
                 options={{ type: 'slide', from: 'bottom' }}
                 duration={500}

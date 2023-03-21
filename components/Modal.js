@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
-import { StyleSheet, Button, View, Dimensions, Animated, Easing } from 'react-native'
+import { Text, View, Dimensions, Animated, Easing, TouchableOpacity } from 'react-native'
 
-const Modal = ({ visible, options, duration, onClose }) => {
+const Modal = ({ title, visible, options, duration, onClose }) => {
     const { height } = Dimensions.get('screen')
     const startPointY = options?.from === 'top' ? -height: height
     const transY = useRef(new Animated.Value(startPointY))
@@ -22,8 +22,12 @@ const Modal = ({ visible, options, duration, onClose }) => {
         }).start()
     }
 
-    const onPress = () => {
+    const onPressClose = () => {
         onClose()
+    }
+
+    const onPressSave = () => {
+        console.log('Alarm Save')
     }
 
     const generateBackgroundOpacity = () => {
@@ -44,37 +48,22 @@ const Modal = ({ visible, options, duration, onClose }) => {
 
     return (
         <>
-        <Animated.View pointerEvents='none' style={[styles.outerContainer, { opacity: generateBackgroundOpacity() }]} />
-        <Animated.View style={[styles.container, { transform: [{ translateY: transY.current }] }]}>
-            <View style={styles.innerContainer}>
-            <Button title='Close Modal' onPress={onPress} />
-            </View>
-        </Animated.View>
+            <Animated.View className='absolute w-full h-full bg-black' style={{ opacity: generateBackgroundOpacity()}} pointerEvents='none'/>
+            <Animated.View className='absolute w-full h-full justify-end items-center ' style={{transform: [{ translateY: transY.current }]}}>
+                <View className='w-full h-[85%] bg-white rounded-[20] flex-row justify-between'>
+                    <TouchableOpacity
+                        onPress={onPressClose}>
+                        <Text className='font-medium text-lg text-blue-600 mx-4 my-3'>Cancel</Text>
+                    </TouchableOpacity>
+                    <Text className='font-medium text-lg text-gray-700  mx-4 my-3'>{title}</Text>
+                    <TouchableOpacity
+                        onPress={onPressSave}>
+                        <Text className='font-bold text-lg text-blue-600 mx-4 my-3'>Save</Text>
+                    </TouchableOpacity>
+                </View>
+            </Animated.View>
         </>
     )
 }
-
-const styles = StyleSheet.create({
-    outerContainer: {
-      position: 'absolute',
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'black',
-    },
-    container: {
-      position: 'absolute',
-      width: '100%',
-      height: '100%',
-      justifyContent: 'flex-end',
-      alignItems: 'center'
-    },
-    innerContainer: {
-      width: '100%',
-      height: '85%',
-      backgroundColor: '#f4f3f4',
-      justifyContent: 'center',
-      borderRadius: 20
-    }
-  })
 
 export default Modal
