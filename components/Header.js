@@ -1,9 +1,21 @@
 import { SafeAreaView, Text, View, TouchableOpacity } from 'react-native'
 
-const Header = ({ title, openModal, setModalTitle, alarms }) => {
+const Header = ({ title, openModal, setModalTitle, alarms, setAlarms }) => {
     const addNewAlarm = () => {
         setModalTitle('Add Alarm')
-        openModal(alarms[0])
+        date = new Date()
+        openModal({
+            time: (new Date().getHours() <= 9 ? '0' + new Date().getHours() : new Date().getHours()) + ':' + (new Date().getMinutes() <= 9 ? '0' + new Date().getMinutes() : new Date().getMinutes()),
+            enabled: true,
+            oneTime: true,
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+        })
     }
 
     return (

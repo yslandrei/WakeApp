@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Text, View, Dimensions, Animated, Easing, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
+import { Text, View, Dimensions, Animated, Easing, TouchableOpacity, TouchableWithoutFeedback, TouchableHighlight } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import RNDateTimePicker from '@react-native-community/datetimepicker'
 import Checkbox from 'expo-checkbox'
 
-const Modal = ({ title, visible, duration, onClose, alarms, setAlarms, alarmIndex, isChecked, setIsChecked }) => {
+const Modal = ({ title, visible, duration, onClose, alarms, setAlarms, isChecked, setIsChecked, selectedAlarm, setSelectedAlarm, date, setDate, time, setTime }) => {
     const { height } = Dimensions.get('screen')
     const startPointY = height
     const transY = useRef(new Animated.Value(startPointY))
@@ -41,27 +41,47 @@ const Modal = ({ title, visible, duration, onClose, alarms, setAlarms, alarmInde
         }
     }
 
+    const setMonday = () => {
+        setSelectedAlarm({...selectedAlarm, monday: !selectedAlarm['monday']})
+    }
+    const setTuesday = () => {
+        setSelectedAlarm({...selectedAlarm, tuesday: !selectedAlarm['tuesday']})
+    }
+    const setWednesday = () => {
+        setSelectedAlarm({...selectedAlarm, wednesday: !selectedAlarm['wednesday']})
+    }
+    const setThursday = () => {
+        setSelectedAlarm({...selectedAlarm, thursday: !selectedAlarm['thursday']})
+    }
+    const setFriday = () => {
+        setSelectedAlarm({...selectedAlarm, friday: !selectedAlarm['friday']})
+    }
+    const setSaturday = () => {
+        setSelectedAlarm({...selectedAlarm, saturday: !selectedAlarm['saturday']})
+    }
+    const setSunday = () => {
+        setSelectedAlarm({...selectedAlarm, sunday: !selectedAlarm['sunday']})
+    }
+
     const onPressClose = () => {
         onClose()
     }
 
-    //Add Asyncstorage
-    const onPressSave = () => {
+    const onPressModify = () => {
         setAlarms(alarms => {
             return alarms.map((alarm, j) => {
-              return j === alarmIndex ? 
+              return alarm['time'] === selectedAlarm['time'] ? 
                 {   
-                    id: alarm['id'],
-                    time: alarm['time'],
+                    time: time,
                     enabled: alarm['enabled'],
                     oneTime: isChecked,
-                    monday: alarm['monday'],
-                    tuesday: alarm['tuesday'],
-                    wednesday: alarm['wednesday'],
-                    thursday: alarm['thursday'],
-                    friday: alarm['friday'],
-                    saturday: alarm['saturday'],
-                    sunday: alarm['sunday'],
+                    monday: selectedAlarm['monday'],
+                    tuesday: selectedAlarm['tuesday'],
+                    wednesday: selectedAlarm['wednesday'],
+                    thursday: selectedAlarm['thursday'],
+                    friday: selectedAlarm['friday'],
+                    saturday: selectedAlarm['saturday'],
+                    sunday: selectedAlarm['sunday'],
                 } 
                 :
                 alarm
@@ -70,14 +90,42 @@ const Modal = ({ title, visible, duration, onClose, alarms, setAlarms, alarmInde
         onClose()
     }
 
+    const onPressNew = () => {
+        setAlarms(alarms => [...alarms, {   
+            time: time,
+            enabled: true,
+            oneTime: isChecked,
+            monday: selectedAlarm['monday'],
+            tuesday: selectedAlarm['tuesday'],
+            wednesday: selectedAlarm['wednesday'],
+            thursday: selectedAlarm['thursday'],
+            friday: selectedAlarm['friday'],
+            saturday: selectedAlarm['saturday'],
+            sunday: selectedAlarm['sunday'],
+        }])
+        onClose()
+    }
 
+    const onPressDelete = () => {
+        setAlarms(alarms.filter((alarm, j) => {
+            if (alarm['time'] != selectedAlarm['time'])
+                return alarm
+        }))
+        onClose()
+    }
 
+    const onChangeTime = (event, selectedDate) => {
+        const currentDate = selectedDate || date
+        setDate(currentDate)
+        let tempDate = new Date(currentDate)
+        setTime((tempDate.getHours() <= 9 ? '0' + tempDate.getHours() : tempDate.getHours()) + ':' + (tempDate.getMinutes() <= 9 ? '0' + tempDate.getMinutes() : tempDate.getMinutes()))
+    }
 
     return (
         <>
             <Animated.View className='absolute w-full h-full bg-black' style={{ opacity: generateBackgroundOpacity()}} pointerEvents='none'/>
             <Animated.View className='absolute w-full h-full justify-end' style={{transform: [{ translateY: transY.current }]}}>
-                <View className='w-full h-[85%] bg-white rounded-[20]'>
+                <View className='w-full h-[85%] bg-white rounded-xl'>
                     <View className='flex-row justify-between'>
                         <TouchableOpacity
                             onPress={onPressClose}>
@@ -85,7 +133,7 @@ const Modal = ({ title, visible, duration, onClose, alarms, setAlarms, alarmInde
                         </TouchableOpacity>
                         <Text className='font-medium text-lg text-gray-700 mx-4 my-3'>{title}</Text>
                         <TouchableOpacity
-                            onPress={onPressSave}>
+                            onPress={title==='Edit Alarm'? onPressModify : onPressNew}>
                             <Text className='font-bold text-lg text-blue-600 mx-4 my-3'>Save</Text>
                         </TouchableOpacity>
                     </View>
@@ -93,29 +141,37 @@ const Modal = ({ title, visible, duration, onClose, alarms, setAlarms, alarmInde
                         <RNDateTimePicker 
                             mode='time'
                             display='spinner' 
-                            value={new Date()} 
+                            value={date}
+                            onChange={onChangeTime}
+
                         />
-                        <View className='flex-col items-center'>
-                            <View className='mb-4 flex-row items-center'>
-                                <Text className='mr-2 text-gray-700 text-base font-normal'>One Time Alarm</Text>
+
+                        <View className='bg-gray-100 rounded-lg mt-2 mx-2 pt-4 pb-5 flex-col items-center'><View>
+                            <View className='mb-2.5 mx-0.5 flex-row'>
+                                <Text className='mr-1.5 text-gray-700 text-base font-normal'>One Time Alarm</Text>
                                 <Checkbox
-                                    style={{borderRadius: 100, height: 24, width: 24, borderWidth: isChecked? 5 : 2}}
+                                    style={{borderRadius: 100, height: 22, width: 22, borderWidth: isChecked? 5 : 1.5}}
                                     value={isChecked}
                                     onValueChange={setIsChecked}
                                     color={'#1C64F2'}
                                 />
                             </View>
-
-                            <View className='bg-gray-300 h-[46] w-[316] rounded-lg flex-row items-center'>
-                                <View style={{backgroundColor: alarms[alarmIndex]["monday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg ml-2 mr-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>M</Text></View>
-                                <View style={{backgroundColor: alarms[alarmIndex]["tuesday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>T</Text></View>
-                                <View style={{backgroundColor: alarms[alarmIndex]["wednesday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>W</Text></View>
-                                <View style={{backgroundColor: alarms[alarmIndex]["thursday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>T</Text></View>
-                                <View style={{backgroundColor: alarms[alarmIndex]["friday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>F</Text></View>
-                                <View style={{backgroundColor: alarms[alarmIndex]["saturday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>S</Text></View>
-                                <View style={{backgroundColor: alarms[alarmIndex]["sunday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg ml-1 mr-2 items-center justify-center'><Text  className='text-lg font-bold text-red-600'>S</Text></View>
+                            <View style={{opacity: isChecked? 0.5 : 1}} className='bg-gray-300 h-[46] w-[316] rounded-lg flex-row items-center'>
+                                <TouchableOpacity onPress={isChecked? null : setMonday} activeOpacity={0.8} style={{backgroundColor: selectedAlarm["monday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg ml-2 mr-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>M</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={isChecked? null : setTuesday} activeOpacity={0.8} style={{backgroundColor: selectedAlarm["tuesday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>T</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={isChecked? null : setWednesday} activeOpacity={0.8} style={{backgroundColor: selectedAlarm["wednesday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>W</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={isChecked? null : setThursday} activeOpacity={0.8} style={{backgroundColor: selectedAlarm["thursday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>T</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={isChecked? null : setFriday} activeOpacity={0.8} style={{backgroundColor: selectedAlarm["friday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>F</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={isChecked? null : setSaturday} activeOpacity={0.8} style={{backgroundColor: selectedAlarm["saturday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg mx-1 items-center justify-center'><Text  className='text-lg font-bold text-gray-700'>S</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={isChecked? null : setSunday} activeOpacity={0.8} style={{backgroundColor: selectedAlarm["sunday"]? "white" : "#D1D5DB"}} className='h-9 w-9 rounded-lg ml-1 mr-2 items-center justify-center'><Text  className='text-lg font-bold text-red-600'>S</Text></TouchableOpacity>
                             </View>
-                        </View>
+                        </View></View>
+                        <TouchableOpacity 
+                            className='flex-row items-end justify-center mt-[240]'
+                            onPress={onPressDelete}
+                            >
+                            <Text className='font-medium text-lg text-red-600'>Delete Alarm</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
                     
